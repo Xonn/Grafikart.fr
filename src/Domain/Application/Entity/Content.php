@@ -18,6 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     "course" = "App\Domain\Course\Entity\Course",
  *     "formation" = "App\Domain\Course\Entity\Formation",
  *     "post" = "App\Domain\Blog\Post",
+ *     "cursus" = "App\Domain\Course\Entity\Cursus",
  * })
  */
 abstract class Content
@@ -137,6 +138,17 @@ abstract class Content
     public function getContent(): ?string
     {
         return $this->content;
+    }
+
+    public function getExcerpt(): string
+    {
+        if (null === $this->content) {
+            return '';
+        }
+
+        $parts = preg_split("/(\r\n|\r|\n){2}/", $this->content);
+
+        return false === $parts ? '' : strip_tags($parts[0]);
     }
 
     /**

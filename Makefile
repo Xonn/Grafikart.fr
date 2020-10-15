@@ -20,6 +20,7 @@ install: public/assets vendor/autoload.php ## Installe les différentes dépenda
 build-docker:
 	# $(dc) pull --ignore-pull-failures
 	$(dc) build --force-rm --pull php
+	$(dc) build --force-rm --pull messenger
 	# $(dc) build --force-rm --pull node
 
 .PHONY: dev
@@ -67,6 +68,7 @@ import: vendor/autoload.php ## Import les données du site actuel
 	$(sy) app:import blog
 	$(sy) app:import comments
 	$(sy) app:import forum
+	# $(sy) app:import badges
 	$(dc) -f docker-compose.import.yml stop
 
 .PHONY: test

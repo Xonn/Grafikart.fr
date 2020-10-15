@@ -2,19 +2,20 @@
 
 namespace App\Infrastructure\Mailing;
 
+use App\Infrastructure\Queue\EnqueueMethod;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Twig\Environment;
 
 class Mailer
 {
-    private MailerInterface $mailer;
     private Environment $twig;
+    private EnqueueMethod $enqueue;
 
-    public function __construct(MailerInterface $mailer, Environment $twig)
+    public function __construct(Environment $twig, EnqueueMethod $enqueue)
     {
-        $this->mailer = $mailer;
         $this->twig = $twig;
+        $this->enqueue = $enqueue;
     }
 
     public function createEmail(string $template, array $data = []): Email
@@ -32,6 +33,6 @@ class Mailer
 
     public function send(Email $email): void
     {
-        $this->mailer->send($email);
+        $this->enqueue->enqueue(MailerInterface::class, 'send', [$email]);
     }
 }

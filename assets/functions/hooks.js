@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'preact/hooks'
+import { useEffect, useState, useCallback, useRef } from 'preact/hooks'
 import { ApiError, jsonFetch } from '/functions/api.js'
 import { flash } from '/elements/Alert.js'
 
@@ -7,7 +7,7 @@ import { flash } from '/elements/Alert.js'
  */
 export function useToggle (initialValue = null) {
   const [value, setValue] = useState(initialValue)
-  return [value, () => setValue(!value)]
+  return [value, useCallback(() => setValue(v => !v), [])]
 }
 
 /**
@@ -17,9 +17,9 @@ export function usePrepend (initialValue = []) {
   const [value, setValue] = useState(initialValue)
   return [
     value,
-    item => {
+    useCallback(item => {
       setValue(v => [item, ...v])
-    }
+    }, [])
   ]
 }
 
@@ -28,6 +28,9 @@ export function usePrepend (initialValue = []) {
  */
 export function useClickOutside (ref, cb) {
   useEffect(() => {
+    if (cb === null) {
+      return
+    }
     const escCb = e => {
       if (e.key === 'Escape' && ref.current) {
         cb()
@@ -110,7 +113,7 @@ export const PROMISE_ERROR = -1
 /**
  * Décore une promesse et renvoie son état
  */
-export default function usePromiseFn (fn) {
+export function usePromiseFn (fn) {
   const [state, setState] = useState(null)
   const resetState = useCallback(() => {
     setState(null)
@@ -131,4 +134,45 @@ export default function usePromiseFn (fn) {
   )
 
   return [state, wrappedFn, resetState]
+}
+
+/**
+ * Hook permettant de détecter quand un élément devient visible à l'écran
+ *
+ * @export
+ * @param {DOMNode reference} node
+ * @param {Boolean} once
+ * @param {Object} [options={}]
+ * @returns {object} visibility
+ */
+export function useVisibility (node, once = true, options = {}) {
+  const [visible, setVisibilty] = useState(false)
+  const isIntersecting = useRef()
+
+  const handleObserverUpdate = entries => {
+    const ent = entries[0]
+
+    if (isIntersecting.current !== ent.isIntersecting) {
+      setVisibilty(ent.isIntersecting)
+      isIntersecting.current = ent.isIntersecting
+    }
+  }
+
+  const observer = once && visible ? null : new IntersectionObserver(handleObserverUpdate, options)
+
+  useEffect(() => {
+    const element = node instanceof HTMLElement ? node : node.current
+
+    if (!element || observer === null) {
+      return
+    }
+
+    observer.observe(element)
+
+    return function cleanup () {
+      observer.unobserve(element)
+    }
+  })
+
+  return visible
 }

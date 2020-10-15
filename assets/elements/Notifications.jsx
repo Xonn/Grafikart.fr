@@ -4,7 +4,8 @@ import { Icon } from '/components/Icon.jsx'
 import { SlideIn } from '/components/Animation/SlideIn.jsx'
 import { isAuthenticated, lastNotificationRead } from '/functions/auth.js'
 import { Spinner } from '/components/Animation/Spinner.jsx'
-import { loadNotifications } from '/api/notifications.js'
+import { loadNotifications, onNotification } from '/api/notifications.js'
+import { jsonFetch } from '/functions/api.js'
 
 const OPEN = 0
 const CLOSE = 1
@@ -27,11 +28,15 @@ export function Notifications () {
   const [notifications, pushNotification] = usePrepend()
   const [notificationReadAt, setNotificationReadAt] = useState(lastNotificationRead())
   const [loading, setLoading] = useState(true)
+  const unreadCount = countUnread(notifications, notificationReadAt)
 
   // Méthodes
   const openMenu = e => {
     e.preventDefault()
     setState(OPEN)
+    if (unreadCount > 0) {
+      jsonFetch('/api/notifications/read', { method: 'post' }).catch(console.error)
+    }
   }
   const closeMenu = () => {
     setNotificationReadAt(new Date())
@@ -47,15 +52,7 @@ export function Notifications () {
   }, [])
 
   // On écoute l'arrivé de nouveaux évènement depuis l'API ou le SSE
-  useEffect(() => {
-    const onNotification = e => {
-      pushNotification(e.detail)
-    }
-    window.addEventListener('gnotification', onNotification)
-    return () => {
-      window.removeEventListener('gnotification', onNotification)
-    }
-  }, [pushNotification])
+  useEffect(() => onNotification('notification', pushNotification), [pushNotification])
 
   // Le système de notification ne fonction que pour les utilisateurs
   if (!isAuthenticated()) return null
@@ -65,7 +62,7 @@ export function Notifications () {
       <button onClick={openMenu}>
         <Icon name='bell' />
       </button>
-      <Badge count={countUnread(notifications, notificationReadAt)} />
+      <Badge count={unreadCount} />
       <SlideIn className='notifications' show={state === OPEN}>
         <Popup
           loading={loading}
@@ -101,10 +98,10 @@ function Popup ({ notifications = [], onClickOutside = () => {}, loading = false
         {notifications.map(n => (
           <Notification key={n.id} notificationReadAt={notificationReadAt} {...n} />
         ))}
-        <a href='/notifications' className='notifications_footer'>
-          Toutes les notifications
-        </a>
       </div>
+      <a href='/notifications' className='notifications_footer'>
+        Toutes les notifications
+      </a>
     </div>
   )
 }
@@ -115,11 +112,6 @@ function Popup ({ notifications = [], onClickOutside = () => {}, loading = false
 function Notification ({ url, message, createdAt, notificationReadAt }) {
   const isRead = notificationReadAt > createdAt
   const className = `notifications_item ${isRead ? 'is-read' : ''}`
-  return (
-    <a href={url} className={className}>
-      <div className='notifications_text'>
-        <p>{message}</p>
-      </div>
-    </a>
-  )
+  // eslint-disable-next-line react/no-danger
+  return <a href={url} className={className} dangerouslySetInnerHTML={{ __html: message }} />
 }

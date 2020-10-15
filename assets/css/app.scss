@@ -11,7 +11,7 @@
   --gap: 20px;
   --space: 8px;
   --border: #d5e3ec;
-  --border-light: #d5e3ec7f;
+  --border-light: #e6eff4;
   --background: #f7fafb;
   --background-light: #fff;
   --shadow: #d8e1e8;
@@ -24,6 +24,7 @@
   --red: #f25353;
   --green: #41cf7c;
   --yellow: #feb32b;
+  --yellow-alpha: #feb32b4C;
   --skeleton: var(--border-light);
   --skeleton-wave: var(--border-light);
 }
@@ -37,8 +38,9 @@
   --gap: 20px;
   --space: 8px;
   --border: #122c45;
-  --background: #11172e;
-  --background-light: #202248;
+  --border-light: #161e3b;
+  --background: #202248;
+  --background-light: #171933;
   --shadow: #0b0c1a;
   --play: #1d1d3a;
   --list-hover: #282a5a;
@@ -119,12 +121,15 @@ body::after {
 @import 'modules/pricing';
 @import 'modules/notifications';
 @import 'modules/footer';
+@import 'modules/stepper';
+@import 'modules/slider';
 // @import 'modules/tooltips';
 
 // Pages
 // ==================
 @import 'pages/live';
 @import 'pages/course';
+@import 'pages/cursus';
 @import 'pages/chapters';
 @import 'pages/auth';
 @import 'pages/blog';
@@ -134,6 +139,8 @@ body::after {
 @import 'pages/home';
 @import 'pages/forum';
 @import 'pages/user';
+@import 'pages/premium';
+@import 'pages/badges';
 // @import "pages/single";
 // @import "pages/single";
 // @import "pages/single";

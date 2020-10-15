@@ -14,8 +14,8 @@
   {% endblock %}
   <meta name="turbolinks-cache-control" content="no-cache" />
 </head>
-<body>
-<nav class="header {% if headerWhite is defined %}is-white{% endif %}">
+<body class="admin {{ app.user and app.user.darkMode ? 'dark' : '' }}">
+<nav class="header container {% if headerWhite is defined %}is-white{% endif %}">
   <ul class="header-nav">
     <li class="header__home"><a href="{{ path('admin_home') }}" title="Accueil">{{ icon('home') }}</a></li>
     <li><a href="{{ path('admin_blog_index') }}" {{ menu_active('blog') }}>{{ icon('pen') }} Blog</a></li>
@@ -26,18 +26,20 @@
     <li><a href="{{ path('admin_user_index') }}" {{ menu_active('user') }}>{{ icon('user') }} Utilisateurs</a></li>
     <li><a href="{{ path('admin_live_index') }}" {{ menu_active('live') }}>{{ icon('video') }} Live</a></li>
     <li><a href="{{ path('admin_premium_index') }}" {{ menu_active('premium') }}>{{ icon('star') }} Premium</a></li>
+    <li hidden><a href="{{ path('admin_badge_index') }}" {{ menu_active('premium') }}>{{ icon('star') }} Badges</a></li>
+    <li hidden><a href="{{ path('admin_cursus_index') }}" {{ menu_active('cursus') }}>{{ icon('lines') }} Cursus</a></li>
+    <li hidden><a href="{{ path('admin_transaction_index') }}" {{ menu_active('premium') }}>{{ icon('star') }} Transactions</a></li>
   </ul>
   <ul class="header-side">
     <li class="header__notification">
       <site-notifications></site-notifications>
     </li>
-    <li class="header__search"><a href="#">{{ icon('search') }}</a></li>
-    {% if app.user %}
-      <li class="header__account"><a href="{{ path('auth_logout') }}">{{ icon('user') }} {{ app.user.username }}</a></li>
-    {% else %}
-      <li class="header__account"><a href="{{ path('auth_login') }}">{{ icon('user') }} Se connecter</a></li>
-    {% endif %}
+    <li class="header__logout"><a href="/">{{ icon('logout') }}</a></li>
+    <li class="header__burger">
+      <button id="js-burger"><span>Afficher le menu</span></button>
+    </li>
   </ul>
+
 </nav>
 <div class="dashboard py5">
 
@@ -45,6 +47,7 @@
 
   {% block body '' %}
 </div>
+<spotlight-bar></spotlight-bar>
 <script>
   window.grafikart = {
     ADMIN: {{ is_granted('SUPERADMIN') ? 'true' : 'false' }},

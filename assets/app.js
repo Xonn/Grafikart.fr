@@ -10,6 +10,10 @@ import './modules/highlight.js'
 import { showHistory } from './modules/history.js'
 import ChoicesJS from 'choices.js'
 import { $$, $ } from '/functions/dom.js'
+import { registerKonami, registerBadgeAlert } from '/modules/badges.js'
+
+registerKonami()
+registerBadgeAlert()
 
 document.addEventListener('turbolinks:load', () => {
   const darkToggle = document.querySelector('#dark-toggle')
@@ -24,7 +28,7 @@ document.addEventListener('turbolinks:load', () => {
   // Header toggle
   const burgerButton = $('#js-burger')
   if (burgerButton) {
-    burgerButton.addEventListener('click', function () {
+    burgerButton.addEventListener('click', () => {
       $('#header').classList.toggle('is-open')
     })
   }

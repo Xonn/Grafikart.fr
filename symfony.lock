@@ -13,6 +13,9 @@
             "src/Entity/.gitignore"
         ]
     },
+    "aura/sql": {
+        "version": "3.0.0"
+    },
     "beberlei/doctrineextensions": {
         "version": "v1.2.6"
     },
@@ -347,6 +350,12 @@
             "config/packages/oneup_flysystem.yaml"
         ]
     },
+    "paypal/paypal-checkout-sdk": {
+        "version": "1.0.1"
+    },
+    "paypal/paypalhttp": {
+        "version": "1.0.0"
+    },
     "paypal/rest-api-sdk-php": {
         "version": "1.14.0"
     },
@@ -529,6 +538,9 @@
     "stripe/stripe-php": {
         "version": "v7.31.0"
     },
+    "symfony/amqp-messenger": {
+        "version": "v5.1.5"
+    },
     "symfony/asset": {
         "version": "v5.0.3"
     },
@@ -582,6 +594,9 @@
     },
     "symfony/doctrine-bridge": {
         "version": "v5.0.3"
+    },
+    "symfony/doctrine-messenger": {
+        "version": "v5.1.5"
     },
     "symfony/dom-crawler": {
         "version": "v5.0.3"
@@ -692,6 +707,18 @@
             "config/packages/mercure.yaml"
         ]
     },
+    "symfony/messenger": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "8a2675c061737658bed85102e9241c752620e575"
+        },
+        "files": [
+            "config/packages/messenger.yaml"
+        ]
+    },
     "symfony/mime": {
         "version": "v5.0.3"
     },
@@ -781,6 +808,9 @@
     },
     "symfony/proxy-manager-bridge": {
         "version": "v5.0.5"
+    },
+    "symfony/redis-messenger": {
+        "version": "v5.1.5"
     },
     "symfony/routing": {
         "version": "5.1",
@@ -936,6 +966,9 @@
     },
     "twig/extra-bundle": {
         "version": "v3.0.1"
+    },
+    "twig/intl-extra": {
+        "version": "v3.0.5"
     },
     "twig/markdown-extra": {
         "version": "v3.0.3"

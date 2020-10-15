@@ -70,9 +70,9 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
     private ?\DateTimeInterface $updatedAt = null;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="datetime", nullable=false)
      */
-    private ?\DateTimeInterface $createdAt = null;
+    private \DateTimeInterface $createdAt;
 
     /**
      * @ORM\Column(type="string", length=2, nullable=true)
@@ -95,6 +95,11 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
      * @ORM\Column(type="string", nullable=true)
      */
     private ?string $confirmationToken = null;
+
+    /**
+     * @ORM\Column(type="boolean", options={"default": false})
+     */
+    private ?bool $darkMode = false;
 
     public function getId(): ?int
     {
@@ -207,7 +212,7 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
@@ -296,5 +301,17 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
     public function canLogin(): bool
     {
         return !$this->isBanned() && null === $this->getConfirmationToken();
+    }
+
+    public function getDarkMode(): ?bool
+    {
+        return $this->darkMode;
+    }
+
+    public function setDarkMode(?bool $darkMode): User
+    {
+        $this->darkMode = $darkMode;
+
+        return $this;
     }
 }

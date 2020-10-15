@@ -4,12 +4,16 @@ namespace App\Domain\Premium\Entity;
 
 use App\Domain\Auth\User;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Intl\Countries;
 
 /**
  * @ORM\Entity(repositoryClass="App\Domain\Premium\Repository\TransactionRepository")
  */
 class Transaction
 {
+    public const PAYPAL = 'paypal';
+    public const STRIPE = 'stripe';
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="IDENTITY")
@@ -58,6 +62,36 @@ class Transaction
      */
     private User $author;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $firstname = null;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $lastname = null;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $address = null;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $city = null;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $postalCode = null;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $countryCode = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -80,6 +114,11 @@ class Transaction
         $this->duration = $duration;
 
         return $this;
+    }
+
+    public function getTotal(): float
+    {
+        return $this->price + $this->tax;
     }
 
     public function getPrice(): float
@@ -164,5 +203,97 @@ class Transaction
         $this->author = $author;
 
         return $this;
+    }
+
+    public function getDescription(): string
+    {
+        return "Compte premium {$this->duration} mois";
+    }
+
+    public function getFullName(): string
+    {
+        return $this->lastname.' '.$this->firstname;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(?string $firstname): Transaction
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(?string $lastname): Transaction
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): Transaction
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): Transaction
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    public function getPostalCode(): ?string
+    {
+        return $this->postalCode;
+    }
+
+    public function setPostalCode(?string $postalCode): Transaction
+    {
+        $this->postalCode = $postalCode;
+
+        return $this;
+    }
+
+    public function getCountryCode(): ?string
+    {
+        return $this->countryCode;
+    }
+
+    public function setCountryCode(?string $countryCode): Transaction
+    {
+        $this->countryCode = $countryCode;
+
+        return $this;
+    }
+
+    public function getCountry(): ?string
+    {
+        return Countries::getNames()[$this->countryCode] ?? null;
+    }
+
+    public function isPaypal(): bool
+    {
+        return self::PAYPAL === $this->method;
     }
 }

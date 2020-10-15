@@ -7,4 +7,12 @@
     {{ icon('user') }}
     Editer
   </a>
+  <a href="{{ path('user_badges') }}" {% if active == 'badges' %}aria-selected="true"{% endif %}>
+    {{ icon('badge') }}
+    Mes badges
+  </a>
+  <a href="{{ path('user_invoices') }}" {% if active == 'invoices' %}aria-selected="true"{% endif %}>
+    {{ icon('inbox') }}
+    Mes factures
+  </a>
 </div>

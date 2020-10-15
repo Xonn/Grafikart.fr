@@ -7,6 +7,7 @@ import Skeleton from './Skeleton.js'
 import { Switch } from './Switch.js'
 import { Comments } from '../components/Comments.jsx'
 import { TimeAgo } from './TimeAgo.js'
+import { TimeCountdown } from './TimeCountdown.js'
 import { Choices } from './Choices.js'
 import { MarkdownEditor } from './editor/index.js'
 import { AjaxDelete } from './AjaxDelete.js'
@@ -23,6 +24,9 @@ import './forum/index.js'
 import { ProgressTracker } from '/elements/courses/ProgressTracker.js'
 import Sharer from '/elements/Sharer.js'
 import DeleteAccount from '/elements/DeleteAccount.jsx'
+import { DarkModeToggle } from '/elements/DarkModeToggle.js'
+import { PremiumButton } from '/elements/premium/PremiumButton.jsx'
+import { BadgeUnlock } from '/elements/BadgeUnlock.jsx'
 
 // Custom Elements
 customElements.define('nav-tabs', NavTabs)
@@ -35,6 +39,7 @@ customElements.define('live-recap', RecapLiveElement)
 customElements.define('play-button', PlayButton)
 customElements.define('waves-shape', Waves)
 customElements.define('time-ago', TimeAgo)
+customElements.define('time-countdown', TimeCountdown)
 customElements.define('ajax-delete', AjaxDelete)
 customElements.define('animated-editor', AnimatedEditor)
 customElements.define('spinning-dots', SpinningDots)
@@ -46,6 +51,8 @@ preactCustomElement('site-notifications', Notifications)
 preactCustomElement('contact-form', ContactForm)
 preactCustomElement('comments-area', Comments, ['target'])
 preactCustomElement('delete-account', DeleteAccount, ['url', 'csrf'])
+preactCustomElement('premium-button', PremiumButton, ['plan', 'children'])
+preactCustomElement('badge-unlock', BadgeUnlock, ['name', 'description'])
 
 // CustomElement étendus
 customElements.define('input-switch', Switch, { extends: 'input' })
@@ -53,3 +60,4 @@ customElements.define('input-choices', Choices, { extends: 'input' })
 customElements.define('markdown-editor', MarkdownEditor, { extends: 'textarea' })
 customElements.define('auto-scroll', AutoScroll, { extends: 'div' })
 customElements.define('auto-submit', AutoSubmit, { extends: 'form' })
+customElements.define('dark-mode-toggle', DarkModeToggle, { extends: 'input' })

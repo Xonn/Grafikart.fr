@@ -58,4 +58,22 @@ trait ChapterableTrait
 
         return $this;
     }
+
+    /**
+     * Extrait le premier contenu du premier chapitre.
+     */
+    public function getFirstContent(): Content
+    {
+        return $this->getChapters()[0]->getModules()[0];
+    }
+
+    /**
+     * Renvoie la liste des ids des contenu organisés.
+     *
+     * @return int[]
+     */
+    public function getModulesIds(): array
+    {
+        return array_reduce($this->getRawChapters(), fn (array $acc, array $chapter) => array_merge($acc, $chapter['modules']), []);
+    }
 }

@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Domain\Course\Repository\CourseRepository")
  * @Vich\Uploadable()
  */
 class Course extends Content
@@ -78,6 +78,11 @@ class Course extends Content
         $this->duration = $duration;
 
         return $this;
+    }
+
+    public function isVideoPremium(): bool
+    {
+        return $this->getPremium() || $this->isScheduled();
     }
 
     public function getYoutubeId(): ?string

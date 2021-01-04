@@ -1,11 +1,11 @@
 {% cache [course, 'card'] %}
-  <article class="card {{ course.premium ? 'card-premium' : '' }} {{ course.scheduled ? 'card-scheduled' : '' }}" data-history="{{ course.id }}" {% if progress is defined %}style="--progress: {{ progress }}"{% endif %}>
+  <article class="card {{ course.premium ? 'card-premium' : '' }} {{ course.scheduled ? 'card-scheduled' : '' }}" data-history="{{ course.id }}">
     <div class="card__body stack">
 
       {# Langages utilisés #}
       <div class="card__icons">
         {% for technology in course.mainTechnologies %}
-          <a href="{{ path('technology_show', {slug: technology.slug}) }}" class="course__icon" tabindex="-1">
+          <a href="{{ path('technology_show', {slug: technology.slug}) }}" class="course__icon" tabindex="-1" title="Tous les tutoriels {{ technology.name }}">
             <img src="{{ uploads_path('icons/' ~ technology.image) }}" alt="{{ technology.name }}">
           </a>
         {% endfor %}
@@ -50,7 +50,7 @@
     {# Difficulté #}
     <div class="card__pills">
 
-      {% include 'partials/level.html.twig' with {content: course} %}
+      {% include 'partials/level.html.twig' with {content: course, small: true} %}
 
       {% if course.premium %}
         <div class="pill pill-xsmall pill-yellow">{{ icon('star') }} Premium</div>

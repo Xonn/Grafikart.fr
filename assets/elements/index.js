@@ -1,6 +1,6 @@
 import { RecapLiveElement } from './RecapLiveElement.js'
 import { PlayButton } from './PlayButton.js'
-import { YoutubePlayer } from './YoutubePlayer.js'
+import { YoutubePlayer } from './player/YoutubePlayer.js'
 import { Waves } from './Waves.js'
 import { Alert, FloatingAlert } from './Alert.js'
 import Skeleton from './Skeleton.js'
@@ -8,7 +8,7 @@ import { Switch } from './Switch.js'
 import { Comments } from '../components/Comments.jsx'
 import { TimeAgo } from './TimeAgo.js'
 import { TimeCountdown } from './TimeCountdown.js'
-import { Choices } from './Choices.js'
+import { InputChoices, SelectChoices } from './Choices.js'
 import { MarkdownEditor } from './editor/index.js'
 import { AjaxDelete } from './AjaxDelete.js'
 import { AutoScroll } from './AutoScroll.js'
@@ -24,9 +24,14 @@ import './forum/index.js'
 import { ProgressTracker } from '/elements/courses/ProgressTracker.js'
 import Sharer from '/elements/Sharer.js'
 import DeleteAccount from '/elements/DeleteAccount.jsx'
-import { DarkModeToggle } from '/elements/DarkModeToggle.js'
 import { PremiumButton } from '/elements/premium/PremiumButton.jsx'
 import { BadgeUnlock } from '/elements/BadgeUnlock.jsx'
+import { Search, SearchInput } from '/elements/search/Search.jsx'
+import { CycleClasses } from '/elements/CycleClasses.js'
+import { Dropdown } from '/elements/Dropdown.js'
+import { Confetti } from '/elements/Confetti.js'
+import { PremiumPlayer } from '/elements/player/PremiumPlayer.js'
+import LoaderOverlay from '/elements/LoaderOverlay.js'
 
 // Custom Elements
 customElements.define('nav-tabs', NavTabs)
@@ -47,17 +52,24 @@ customElements.define('admin-edit', EditButton)
 customElements.define('progress-tracker', ProgressTracker)
 customElements.define('skeleton-box', Skeleton)
 customElements.define('social-share', Sharer, { extends: 'a' })
+customElements.define('cycle-classes', CycleClasses)
+customElements.define('drop-down', Dropdown)
+customElements.define('con-fetti', Confetti)
+customElements.define('premium-player', PremiumPlayer)
+customElements.define('loader-overlay', LoaderOverlay)
 preactCustomElement('site-notifications', Notifications)
 preactCustomElement('contact-form', ContactForm)
 preactCustomElement('comments-area', Comments, ['target'])
 preactCustomElement('delete-account', DeleteAccount, ['url', 'csrf'])
 preactCustomElement('premium-button', PremiumButton, ['plan', 'children'])
 preactCustomElement('badge-unlock', BadgeUnlock, ['name', 'description'])
+preactCustomElement('search-button', Search)
+preactCustomElement('search-input', SearchInput)
 
 // CustomElement étendus
 customElements.define('input-switch', Switch, { extends: 'input' })
-customElements.define('input-choices', Choices, { extends: 'input' })
+customElements.define('input-choices', InputChoices, { extends: 'input' })
+customElements.define('select-choices', SelectChoices, { extends: 'select' })
 customElements.define('markdown-editor', MarkdownEditor, { extends: 'textarea' })
 customElements.define('auto-scroll', AutoScroll, { extends: 'div' })
 customElements.define('auto-submit', AutoSubmit, { extends: 'form' })
-customElements.define('dark-mode-toggle', DarkModeToggle, { extends: 'input' })

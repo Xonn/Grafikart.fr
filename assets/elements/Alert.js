@@ -25,8 +25,9 @@ export class Alert extends HTMLElement {
       progressBar = `<div class="alert__progress" style="animation-duration: ${duration}s">`
       window.setTimeout(this.close, duration * 1000)
     }
-    this.innerHTML = `<div class="alert alert-${this.type}">
-        <svg class="icon icon-${this.icon}">
+    this.classList.add('alert')
+    this.classList.add(`alert-${this.type}`)
+    this.innerHTML = `<svg class="icon icon-${this.icon}">
           <use xlink:href="/sprite.svg#${this.icon}"></use>
         </svg>
         <div>
@@ -37,8 +38,7 @@ export class Alert extends HTMLElement {
             <use xlink:href="/sprite.svg#cross"></use>
           </svg>
         </button>
-        ${progressBar}
-      </div>`
+        ${progressBar}`
     this.querySelector('.alert-close').addEventListener('click', e => {
       e.preventDefault()
       this.close()
@@ -46,10 +46,9 @@ export class Alert extends HTMLElement {
   }
 
   close () {
-    const element = this.querySelector('.alert')
-    element.classList.add('out')
+    this.classList.add('out')
     window.setTimeout(async () => {
-      await slideUp(element)
+      await slideUp(this)
       this.parentElement.removeChild(this)
       this.dispatchEvent(new CustomEvent('close'))
     }, 500)
@@ -84,7 +83,7 @@ export class FloatingAlert extends Alert {
  * @param {number|null} duration
  */
 export function flash (message, type = 'success', duration = 2) {
-  const alert = new FloatingAlert()
+  const alert = document.createElement('alert-floating')
   if (duration) {
     alert.setAttribute('duration', duration)
   }

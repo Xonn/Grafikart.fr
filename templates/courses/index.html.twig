@@ -1,36 +1,48 @@
 {% extends 'base.html.twig' %}
 
+{% set bodyClass = 'header-light' %}
+
 {% block title 'Tous les tutoriels' ~ ((page > 1) ? (', page' ~ page) : '') %}
 
 {% block body %}
-  <div class="container py5">
 
-    <div class="filter text-right pb2">
-      <div class="hstack" style="justify-content: flex-end; align-items: center;">
-        <small class="text-muted">Filtrer :</small>
-        <div class="form-group">
-          <select name="level" class="form-control" style="padding: 3px; min-height: auto;">
-            <option selected>Difficulté</option>
-            <option value="a">Débutant</option>
-            <option value="b">Débutant</option>
-            <option value="c">Débutant</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <select name="level" class="form-control" style="padding: 3px; min-height: auto;">
-            <option selected>Technologie</option>
-            <option value="a">Débutant</option>
-            <option value="b">Débutant</option>
-            <option value="c">Débutant</option>
-          </select>
-        </div>
+  <main class="split-background container py5" style="--split:350px">
+
+    <div class="grid-filter mb3">
+      <div class="grid-filter__group">
+        <label for="filter-level">Niveau : </label>
+        <select name="level" id="filter-level" is="select-choices" data-redirect>
+          <option value="">Tous</option>
+          {% for key, level in levels  %}
+            <option {{ app.request.get('level') == key ~ '' ? 'selected' : ''}} value="{{ key }}">{{ level }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="grid-filter__group">
+        <label for="filter-technology">Technologie : </label>
+        <select name="technology" id="filter-technology" is="select-choices" data-redirect data-search="{{ path('api_technology_search') }}" data-value="slug" data-label="name">
+          <optgroup label="">
+            <option value="">Toutes</option>
+            {% if technology_selected %}
+              <option value="{{ technology_selected.slug }}" selected>{{ technology_selected.name }}</option>
+            {% endif %}
+          </optgroup>
+          {% for key, technologiesGroup in technologies  %}
+            <optgroup label="{{ key }}">
+              {% for technology in technologiesGroup %}
+                <option value="{{ technology.slug }}">{{ technology.name }}</option>
+              {% endfor %}
+            </optgroup>
+          {% endfor %}
+        </select>
       </div>
     </div>
 
+    {% if courses | length > 0 %}
     <div class="courses">
       <div class="course-hero {% if page > 1 %}is-paginated{% endif %}">
         {% if page == 1 %}
-          <h1>Tous les tutoriels</h1>
+          <h1>Tous les <strong>tutoriels</strong></h1>
           <p>
             Envie d'apprendre de nouvelles choses et maitriser de nouvelles technologies ?<br>
             Alors vous êtes sur le bon chemin...
@@ -46,8 +58,19 @@
 
     {{ paginate(courses) }}
 
-  </div>
+    {% else %}
+      <div class="text-center">
+        <h1 class="hero-title mb1">Aucun <strong>tutoriels</strong> :(</h1>
+        <p class="text-big">
+          Aucun contenu ne correspond aux filtres que vous avez sélectionnés.
+        </p>
+      </div>
+    {% endif %}
 
-  {{ show_history(courses.items) }}
+  </main>
+
+  {% if app.user %}
+    {{ show_history(courses.items) }}
+  {% endif %}
 
 {% endblock %}

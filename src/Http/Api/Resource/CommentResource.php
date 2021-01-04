@@ -7,8 +7,10 @@ use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Domain\Comment\Comment;
 use App\Domain\Comment\CommentData;
+use Parsedown;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 
 /**
  * @ApiResource(
@@ -54,6 +56,11 @@ class CommentResource extends CommentData
     /**
      * @Groups({"read"})
      */
+    public string $html = '';
+
+    /**
+     * @Groups({"read"})
+     */
     public ?string $avatar = null;
 
     /**
@@ -88,17 +95,28 @@ class CommentResource extends CommentData
      */
     public ?int $userId = null;
 
-    public static function fromComment(Comment $comment): CommentResource
+    public static function fromComment(Comment $comment, ?UploaderHelper $uploaderHelper = null): CommentResource
     {
         $resource = new self();
         $author = $comment->getAuthor();
         $resource->id = $comment->getId();
         $resource->username = $comment->getUsername();
         $resource->content = $comment->getContent();
+        $resource->html = strip_tags(
+            (new Parsedown())
+                ->setBreaksEnabled(true)
+                ->setSafeMode(true)
+                ->text($comment->getContent()),
+            '<p><pre><code><ul><ol><li>'
+        );
         $resource->createdAt = $comment->getCreatedAt()->getTimestamp();
-        $resource->parent = null !== $comment->getParent() ? $comment->getParent()->getId() : null;
-        $gravatar = md5($comment->getEmail());
-        $resource->avatar = "https://1.gravatar.com/avatar/{$gravatar}?s=200&r=pg&d=mp";
+        $resource->parent = null !== $comment->getParent() ? $comment->getParent()->getId() : 0;
+        if ($author && $uploaderHelper && $author->getAvatarName()) {
+            $resource->avatar = $uploaderHelper->asset($author, 'avatarFile');
+        } else {
+            $gravatar = md5($comment->getEmail());
+            $resource->avatar = "https://1.gravatar.com/avatar/{$gravatar}?s=200&r=pg&d=mp";
+        }
         $resource->entity = $comment;
         $resource->userId = $author ? $author->getId() : null;
 

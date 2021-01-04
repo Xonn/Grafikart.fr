@@ -1,0 +1,127 @@
+server {
+    listen                  443 ssl http2;
+    listen                  [::]:443 ssl http2;
+    server_name             {{ domain }};
+    set                     $base {{ root_path }};
+    root                    $base/public;
+
+    # SSL
+{% if self_signed %}
+    ssl_certificate /etc/letsencrypt/dev/{{ domain }}.crt;
+    ssl_certificate_key /etc/letsencrypt/dev/{{ domain }}.key;
+{% else %}
+    ssl_certificate         /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ domain }}/chain.pem;
+{% endif %}
+
+    # security
+    include                 nginxconfig.io/security.conf;
+
+    # logging
+    access_log              /var/log/nginx/access.log;
+    error_log               /var/log/nginx/{{ domain }}.error.log warn;
+
+    # index.php
+    index                   index.php;
+{% if noindex %}
+    add_header X-Robots-Tag "noindex, nofollow, nosnippet, noarchive";
+{% endif %}
+
+    # Mercure
+    location /.well-known/mercure/ {
+        proxy_pass http://localhost:3000/.well-known/mercure;
+        proxy_read_timeout 24h;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # index.php fallback
+    location / {
+        limit_req zone=main burst=10;
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ ^/media/(convert|resize)/.*$ {
+        expires    7d;
+        access_log off;
+        try_files $uri /index.php?$query_string;
+    }
+
+{% if false %}
+    # Permet d'utiliser un proxy si PHP fonctionnait avec nginx, try_files $uri @php
+    location @php {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+{% endif %}
+
+    # Téléchargements des vidéos et sources
+    location ~ ^/downloads/(?<path>.*)$ {
+        auth_request     /index.php;
+        auth_request_set $auth_status $upstream_status;
+        alias $base/downloads/$path;
+    }
+
+    # GoAccess report
+    location ~ ^/report.html$ {
+        auth_request     /index.php;
+        auth_request_set $auth_status $upstream_status;
+	add_header Content-Security-Policy "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'";
+    }
+
+    # additional config
+    include nginxconfig.io/general.conf;
+
+    # handle .php
+    location ~ \.php$ {
+ {% if docker %}
+        try_files                     $fastcgi_script_name =404;
+        include                       fastcgi_params;
+        fastcgi_pass                  127.0.0.1:9001;
+        fastcgi_index                 index.php;
+        fastcgi_buffers               8 16k;
+        fastcgi_buffer_size           32k;
+        fastcgi_param DOCUMENT_ROOT   /var/www/public;
+        fastcgi_param SCRIPT_FILENAME /var/www/public$fastcgi_script_name;
+        fastcgi_param PHP_ADMIN_VALUE "open_basedir=/var/www/:/usr/lib/php/:/tmp/";
+  {% else %}
+        include nginxconfig.io/php_fastcgi.conf;
+  {% endif %}
+    }
+}
+
+# subdomains redirect
+server {
+    listen                  443 ssl http2;
+    listen                  [::]:443 ssl http2;
+    server_name             *.{{ domain }};
+
+    # SSL
+{% if self_signed %}
+    ssl_certificate /etc/letsencrypt/dev/{{ domain }}.crt;
+    ssl_certificate_key /etc/letsencrypt/dev/{{ domain }}.key;
+{% else %}
+    ssl_certificate         /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/{{ domain }}/chain.pem;
+{% endif %}
+    return                  301 https://{{ domain }}$request_uri;
+}
+
+# HTTP redirect
+server {
+    listen      80;
+    listen      [::]:80;
+    server_name .{{ domain }};
+    include     nginxconfig.io/letsencrypt.conf;
+
+    location / {
+        return 301 https://{{ domain }}$request_uri;
+    }
+}

@@ -14,7 +14,7 @@ final class CommentImporter extends MySQLImporter
     {
         $this->truncate('comment');
         $offset = 0;
-        $io->title('Importation des utilisateurs');
+        $io->title('Importation des commentaires');
         $query = $this->pdo->prepare('SELECT COUNT(id) as count FROM comments');
         $query->execute();
         $result = $query->fetch();
@@ -83,6 +83,7 @@ final class CommentImporter extends MySQLImporter
         }
         ++$lastId;
         $this->em->getConnection()->exec("ALTER SEQUENCE comment_id_seq RESTART WITH $lastId;");
+        $this->em->getConnection()->exec('REINDEX table "comment";');
         $io->progressFinish();
         $io->success(sprintf('Importation de %d commentaires', $result['count']));
     }
@@ -90,8 +91,11 @@ final class CommentImporter extends MySQLImporter
     private function attachContent(Comment $comment, string $type, int $id, ?string $slug): bool
     {
         if ('Tutoriel' === $type && $id > 0) {
-            /** @var Course $course */
-            $course = $this->em->getReference(Course::class, $id);
+            /** @var ?Course $course */
+            $course = $this->em->find(Course::class, $id);
+            if (null === $course) {
+                return false;
+            }
             $comment->setTarget($course);
 
             return true;

@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Queue\Handler;
 
 use App\Domain\Live\LiveSyncService;
+use App\Domain\Notification\NotificationService;
 use App\Infrastructure\Queue\Message\ServiceMethodMessage;
 use App\Infrastructure\Youtube\YoutubeUploaderService;
 use Psr\Container\ContainerInterface;
@@ -27,6 +28,7 @@ class ServiceMethodMessageHandler implements MessageHandlerInterface, ServiceSub
             $this->container->get($message->getServiceName()),
             $message->getMethod(),
         ];
+
         call_user_func_array($callable, $message->getParams());
     }
 
@@ -37,6 +39,7 @@ class ServiceMethodMessageHandler implements MessageHandlerInterface, ServiceSub
             YoutubeUploaderService::class => YoutubeUploaderService::class,
             MailerInterface::class => MailerInterface::class,
             PublisherInterface::class => PublisherInterface::class,
+            NotificationService::class => NotificationService::class,
         ];
     }
 }

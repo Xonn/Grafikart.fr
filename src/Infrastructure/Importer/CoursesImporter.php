@@ -7,6 +7,7 @@ use App\Domain\Auth\User;
 use App\Domain\Course\Entity\Course;
 use App\Domain\Course\Entity\Technology;
 use App\Domain\Course\Entity\TechnologyUsage;
+use App\Domain\Course\Repository\CourseRepository;
 use Everyman\Neo4j\Node;
 use Everyman\Neo4j\Query\Row;
 use Everyman\Neo4j\Relationship;
@@ -19,6 +20,7 @@ final class CoursesImporter extends Neo4jImporter
         $this->importTechnologies($io);
         $this->importCourses($io);
         $this->importCourseTechnologyRelations($io);
+        $this->importDepreciations($io);
     }
 
     private function importTechnologies(SymfonyStyle $io): void
@@ -98,8 +100,11 @@ final class CoursesImporter extends Neo4jImporter
         foreach ($rows as $row) {
             $tutoriel = $row->offsetGet(0)->getProperties();
             $user = $row->offsetGet(1)->getProperties();
-            /** @var User $author */
-            $author = $this->em->getReference(User::class, $user['uuid']);
+            /** @var ?User $author */
+            $author = $this->em->find(User::class, $user['uuid']);
+            if (null === $author) {
+                continue;
+            }
             $createdAt = new \DateTime('@'.$tutoriel['created_at']);
             $course = (new Course())
                 ->setYoutubeId($tutoriel['youtube'] ?? null)
@@ -131,6 +136,7 @@ final class CoursesImporter extends Neo4jImporter
         $this->em->flush();
         $id = $tutoriel['uuid'] + 1;
         $this->em->getConnection()->exec("ALTER SEQUENCE content_id_seq RESTART WITH $id;");
+        $this->em->getConnection()->exec('REINDEX table "content";');
         $this->restoreAutoIncrement(Content::class);
         $this->em->clear();
         $io->success(sprintf('Import de %d cours', $rows->count()));
@@ -162,22 +168,46 @@ final class CoursesImporter extends Neo4jImporter
             $key = $courseId.'='.$technologySlug;
             /** @var Relationship $relation */
             $relation = $row->offsetGet(1);
-            /** @var Content $content */
-            $content = $this->em->getReference(Content::class, $courseId);
+            /** @var ?Content $content */
+            $content = $this->em->find(Content::class, $courseId);
+            if (null === $content || in_array($key, $keys)) {
+                continue;
+            }
             $usage = (new TechnologyUsage())
                 ->setVersion($relation->getProperty('version'))
                 ->setSecondary('USE' === $relation->getType())
                 ->setTechnology($technologies[$technologySlug])
                 ->setContent($content);
-            if (!in_array($key, $keys)) {
-                $this->em->persist($usage);
-            }
+            $this->em->persist($usage);
             $keys[] = $key;
             $io->progressAdvance();
         }
         $this->em->flush();
         $io->progressFinish();
         $io->success(sprintf('Import de %d relations', $rows->count()));
+    }
+
+    private function importDepreciations(SymfonyStyle $io): void
+    {
+        $io->title('Import des dépréciations');
+        $rows = $this->neo4jQuery(<<<CYPHER
+            MATCH (old:Tutoriel)<-[:DEPRECATE]-(t:Tutoriel)
+            RETURN t, old
+        CYPHER
+        );
+        $io->progressStart();
+        /** @var CourseRepository $courseRepository */
+        $courseRepository = $this->em->getRepository(Course::class);
+        /** @var Row<mixed> $row */
+        foreach ($rows as $row) {
+            $newCourse = $row->offsetGet(0)->getProperty('uuid');
+            $oldCourse = $row->offsetGet(1)->getProperty('uuid');
+            $courseRepository->findOrFail($oldCourse)->setDeprecatedBy($courseRepository->find($newCourse));
+            $io->progressAdvance();
+        }
+        $io->progressFinish();
+        $this->em->flush();
+        $this->em->clear();
     }
 
     public function support(string $type): bool

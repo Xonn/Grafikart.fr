@@ -1,9 +1,39 @@
+// Listing
+// =============
+.cursus-listing {
+  --padding: 70px;
+}
+.cursus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+  grid-gap: space(4);
+  grid-auto-flow: dense;
+
+  @include down(660) {
+    grid-template-columns: 1fr;
+  }
+}
+.cursus-section {
+  @extend %container;
+  padding-top: var(--padding);
+  padding-bottom: var(--padding);
+  background: var(--background-light);
+}
+.cursus-section:first-child {
+  padding-bottom: calc(var(--padding) * .5);
+  background: linear-gradient(to top, var(--background), var(--background)) left bottom/100% 250px no-repeat var(--background-light);
+}
+.cursus-section:nth-child(2n) {
+  background: var(--background);
+}
+
+// Page cursus
+// =============
 .cursus-page {
   @extend %container-margin;
   position: relative;
   --gap: 8;
 }
-
 .cursus-page::after {
   content:'';
   position: absolute;
@@ -14,12 +44,10 @@
   z-index: -2;
   background-color: var(--border-light);
 }
-
 .cursus-page__chapter {
   padding-left: 50px;
   position: relative;
 }
-
 .cursus-page__chapter::before,
 .cursus-page__chapter::after {
   content:'';
@@ -35,3 +63,50 @@
   background: var(--background);
   border: 7px solid var(--border-light);
 }
+.cursus-header {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: space(4);
+  align-items: flex-start;
+
+  & > *:first-child {
+    align-self: center;
+  }
+
+  img {
+    display: none;
+  }
+
+  @include up(700) {
+    grid-template-columns: 1fr 500px;
+
+    & > *:first-child {
+      align-self: center;
+    }
+
+    img {
+      display: block;
+      height: 350px;
+      margin-top: -30px;
+      margin-bottom: -100px;
+    }
+  }
+}
+/**
+.cursus-header__technologies {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: space(4);
+}
+
+.cursus-header__technologies a {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cursus-header__technologies img {
+  display: block;
+  width: 100%;
+}
+**/

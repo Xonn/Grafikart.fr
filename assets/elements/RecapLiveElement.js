@@ -1,3 +1,5 @@
+import { YoutubePlayer } from './player/YoutubePlayer.js'
+
 /**
  * Element permettant de gérer la liste des derniers lives
  *
@@ -8,9 +10,6 @@
  * @property {HTMLAnchorElement} currentLive
  * @property {string} path URL vers les lives
  */
-import { YoutubePlayer } from './YoutubePlayer.js'
-import SpinningDots from '@grafikart/spinning-dots-element'
-
 export class RecapLiveElement extends HTMLElement {
   connectedCallback () {
     this.path = this.getAttribute('path')
@@ -92,7 +91,7 @@ export class RecapLiveElement extends HTMLElement {
   }
 
   showLoader () {
-    const loader = new SpinningDots()
+    const loader = document.createElement('spinning-dots')
     loader.style.width = '20px'
     loader.classList.add('loader')
     this.querySelector('.live-years').appendChild(loader)

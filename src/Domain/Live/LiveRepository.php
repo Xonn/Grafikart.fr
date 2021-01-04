@@ -2,17 +2,15 @@
 
 namespace App\Domain\Live;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use App\Core\Orm\AbstractRepository;
+use App\Core\Orm\IterableQueryBuilder;
 use Doctrine\ORM\Query;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Live|null find($id, $lockMode = null, $lockVersion = null)
- * @method Live|null findOneBy(array $criteria, array $orderBy = null)
- * @method Live[]    findAll()
- * @method Live[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends AbstractRepository<Live>
  */
-class LiveRepository extends ServiceEntityRepository
+class LiveRepository extends AbstractRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -67,5 +65,13 @@ class LiveRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
 
         return $date ? new \DateTime($date) : null;
+    }
+
+    /**
+     * @return IterableQueryBuilder<Live>
+     */
+    public function findRecent(int $limit): IterableQueryBuilder
+    {
+        return $this->createIterableQuery('l')->orderBy('l.createdAt', 'DESC')->setMaxResults($limit);
     }
 }

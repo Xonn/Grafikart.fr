@@ -6,6 +6,8 @@ parameters:
   image_resize_key: '%env(resolve:IMAGE_RESIZE_KEY)%'
   twitter_key:      '%env(resolve:TWITTER_KEY)%'
   twitter_secret:   '%env(resolve:TWITTER_SECRET)%'
+  container.dumper.inline_factories: true
+  container.dumper.inline_class_loader: true
 
 services:
   _defaults:
@@ -17,7 +19,7 @@ services:
       $projectDir: '%kernel.project_dir%'
 
   _instanceof:
-    App\Core\Twig\BreadcrumbInterface:
+    App\Core\Breadcrumb\BreadcrumbGeneratorInterface:
       tags: ['app.breadcrumb']
 
   App\:
@@ -64,6 +66,7 @@ services:
   App\Core\Twig\TwigAssetExtension:
     arguments:
       $assetPath: '%kernel.project_dir%/public/assets'
+      $env: '%kernel.environment%'
 
   App\Core\OptionInterface:
     class: 'App\Domain\Application\Option'
@@ -79,3 +82,13 @@ services:
 
   App\Infrastructure\Queue\FailedJobsService:
     arguments: ['@messenger.transport.failed']
+
+  App\Infrastructure\Queue\ScheduledJobsService:
+    arguments:
+      $dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+
+  App\Domain\Premium\VideoUrlGenerator:
+    arguments: ['%env(STREAMING_BASE)%', '%env(STREAMING_SIGNATURE)%']
+
+  App\Infrastructure\Spam\SpamService:
+    arguments: [['App\Domain\Forum\Entity\Topic', 'App\Domain\Forum\Entity\Message']]

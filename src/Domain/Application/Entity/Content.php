@@ -2,6 +2,7 @@
 
 namespace App\Domain\Application\Entity;
 
+use App\Core\Twig\CacheExtension\CacheableInterface;
 use App\Domain\Attachment\Attachment;
 use App\Domain\Auth\User;
 use App\Domain\Course\Entity\Course;
@@ -13,7 +14,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Domain\Application\Repository\ContentRepository")
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({
@@ -23,7 +24,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     "cursus" = "App\Domain\Course\Entity\Cursus",
  * })
  */
-abstract class Content
+abstract class Content implements CacheableInterface
 {
     /**
      * @ORM\Id()
@@ -31,6 +32,8 @@ abstract class Content
      * @ORM\Column(type="integer")
      */
     private ?int $id = null;
+
+    private string $type = '';
 
     /**
      * @ORM\Column(type="string", length=255)

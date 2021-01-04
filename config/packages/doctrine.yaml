@@ -25,8 +25,11 @@ doctrine:
         prefix: 'App\Domain'
         alias: Domain
     dql:
+      numeric_functions:
+        RANDOM: DoctrineExtensions\Query\Sqlite\Random
       datetime_functions:
         EXTRACT: DoctrineExtensions\Query\Postgresql\ExtractFunction
+        TO_CHAR: DoctrineExtensions\Query\Postgresql\DateFormat
         NOW: DoctrineExtensions\Query\Mysql\Now
       string_functions:
         LPAD: DoctrineExtensions\Query\Mysql\Lpad

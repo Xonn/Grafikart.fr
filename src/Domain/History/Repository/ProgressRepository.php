@@ -2,19 +2,18 @@
 
 namespace App\Domain\History\Repository;
 
+use App\Core\Orm\AbstractRepository;
 use App\Domain\Application\Entity\Content;
 use App\Domain\Auth\User;
+use App\Domain\Course\Entity\Course;
+use App\Domain\Course\Entity\Formation;
 use App\Domain\History\Entity\Progress;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Progress|null find($id, $lockMode = null, $lockVersion = null)
- * @method Progress|null findOneBy(array $criteria, array $orderBy = null)
- * @method Progress[]    findAll()
- * @method Progress[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends AbstractRepository<Progress>
  */
-class ProgressRepository extends ServiceEntityRepository
+class ProgressRepository extends AbstractRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -40,7 +39,11 @@ class ProgressRepository extends ServiceEntityRepository
             ->leftJoin('p.content', 'c')
             ->addSelect('partial c.{id}')
             ->where('p.content IN (:ids)')
-            ->setParameter('ids', array_map(fn (Content $c) => $c->getId(), $contents))
+            ->andWhere('p.author = :user')
+            ->setParameters([
+                'ids' => array_map(fn (Content $c) => $c->getId(), $contents),
+                'user' => $user,
+            ])
             ->getQuery()
             ->getResult();
     }
@@ -50,16 +53,35 @@ class ProgressRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->leftJoin('p.content', 'c')
             ->where('p.author = :user')
-            ->andWhere('c INSTANCE OF :type')
+            ->andWhere('(c INSTANCE OF '.Course::class.' OR c INSTANCE OF '.Formation::class.')')
             ->andWhere('p.progress < :progress')
             ->orderBy('p.updatedAt', 'DESC')
             ->setMaxResults(4)
             ->setParameters([
                 'user' => $user,
-                'type' => 'course',
                 'progress' => Progress::TOTAL,
             ])
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Trouve les ids lu parmis la liste passée en paramètre.
+     *
+     * @return int[]
+     */
+    public function findFinishedIdWithin(User $user, array $ids): array
+    {
+        return array_map(fn (Progress $p) => $p->getContent()->getId(), $this->createQueryBuilder('p')
+            ->where('p.content IN (:ids)')
+            ->andWhere('p.author = :user')
+            ->andWhere('p.progress = :total')
+            ->setParameters([
+                'user' => $user,
+                'ids' => $ids,
+                'total' => Progress::TOTAL,
+            ])
+            ->getQuery()
+            ->getResult());
     }
 }

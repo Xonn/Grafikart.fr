@@ -1,5 +1,44 @@
 .forum-page {
   @extend %container;
+  display: grid;
+  grid-gap: space(3);
+  grid-template-columns: 1fr;
+
+  @include up(800) {
+    grid-template-columns: 190px 1fr;
+  }
+}
+
+.forum-header {
+  display: grid;
+  grid-gap: space(2);
+
+  @include up(800) {
+    display: flex;
+    align-items: center;
+
+    form {
+      margin-left: 70px;
+      width: 100%;
+    }
+  }
+}
+
+.forum-page__sidebar {
+  @include down(800) {
+    grid-row-start: 2;
+  }
+}
+
+.forum-search {
+  position: relative;
+
+  button {
+    position: absolute;
+    right: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
 }
 
 // Avatar
@@ -62,8 +101,14 @@
   grid-template-columns: 40px 1fr 30px;
   grid-gap: space(2);
   padding: space(2);
+  width: calc(100% + #{space(2)});
   position: relative;
   transition: 0.3s;
+
+  @include down(800) {
+    margin-left: space(-2);
+    margin-right: space(-2);
+  }
 }
 
 .forum-topic a {
@@ -84,6 +129,7 @@
 .forum-topic.is-read {
   filter: grayscale(1);
   opacity: .6;
+
   .forum-topic__title {
     color: var(--color-light);
   }
@@ -103,13 +149,33 @@
 
 .forum-topic__body {
   position: relative;
+
+  @include down(800) {
+    padding-top: 22px;
+  }
 }
 
 .forum-topic__tags {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   display: flex;
+  flex-wrap: nowrap;
+  grid-gap: space(1);
+  max-width: 100%;
+  overflow: auto;
+
+  @include up(800) {
+    max-width: 200px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    right: 0;
+    left: auto;
+  }
+
+  & > * {
+    white-space: nowrap;
+  }
 }
 
 .forum-topic__tags a[style] {
@@ -243,24 +309,29 @@
 // Tag
 // =============
 .forum-tags a {
-  display: inline-block;
-  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  padding: 5px space(1);
+
+  img {
+    margin-right: space(1);
+    transform: translateY(-1px);
+  }
 
   &:hover {
     color: var(--contrast);
   }
+
+  &[aria-selected="true"] {
+    background-color: var(--background-light);
+    box-shadow: 0 2px 4px var(--shadow);
+    border-radius: 2px;
+  }
 }
 
 .forum-tags li li a {
-  margin-left: 40px;
-}
-
-@include up(800) {
-  .forum-page {
-    display: grid;
-    grid-template-columns: 190px 1fr;
-    grid-gap: space(3);
-  }
+  padding-left: space(5);
+  font-size: .9rem;
 }
 
 // Report
@@ -271,9 +342,11 @@
   align-items: center;
   color: var(--color-light);
 }
+
 .forum-report:disabled {
   opacity: 0.6;
 }
+
 .forum-report__form {
   @extend %card;
   top: 100%;

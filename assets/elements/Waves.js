@@ -1,7 +1,7 @@
-// On mémorise si la page précédente avait la vague
 import { offsetTop } from '/functions/dom.js'
 import { debounce } from '/functions/timers.js'
 
+// On mémorise si la page précédente avait la vague
 let previousPageHadWaves = false
 
 /**
@@ -25,7 +25,6 @@ export class Waves extends HTMLElement {
     const className = previousPageHadWaves === true ? 'no-animation' : ''
     const target = document.querySelector(this.getAttribute('target'))
     const image = this.backgroundImage()
-    const opacity = image ? '.9' : '1'
     previousPageHadWaves = true
     document.querySelector('.header').classList.add('is-inversed')
     this.target = target ? document.querySelector(this.getAttribute('target')) : null
@@ -42,8 +41,6 @@ export class Waves extends HTMLElement {
         bottom: 0;
         right: 0;
         object-fit: cover;
-        opacity: 0;
-        transition: .3s;
       }
       .waves-container {
         opacity: 1!important;
@@ -58,7 +55,6 @@ export class Waves extends HTMLElement {
         height: 0;
         box-sizing: content-box;
         padding-bottom: var(--wave-height, 235px);
-        animation: containerIn .4s;
       }
       .waves-container.no-animation * {
         animation: none!important;
@@ -73,7 +69,8 @@ export class Waves extends HTMLElement {
         height: 100%;
         z-index: 2;
         background: linear-gradient(to bottom, var(--contrast), var(--contrast));
-        opacity: ${opacity};
+        transition: opacity .3s;
+        animation: backgroundIn .4s;
       }
       .waves {
         position: absolute;
@@ -103,14 +100,13 @@ export class Waves extends HTMLElement {
             transform: translateY(0px);
         }
       }
-      @keyframes containerIn {
+      /* Cette animation ne sert à rien mais permet d'empécher un bug de clipping (MERCI CHROME !) */
+      @keyframes backgroundIn {
         from {
-            opacity: 0;
-            transform: translateY(-30px);
+            transform: scaleY(1.1);
         }
         to {
-            opacity: 1;
-            transform: translateY(0px);
+            transform: scaleY(1);
         }
       }
       </style>
@@ -133,9 +129,10 @@ export class Waves extends HTMLElement {
     `
     this.container = this.root.querySelector('.waves-container')
     this.waves = this.root.querySelector('.waves')
+    const background = this.root.querySelector('.waves-background')
     if (image) {
-      this.root.querySelector('img').addEventListener('load', e => {
-        e.currentTarget.style.opacity = 1
+      this.root.querySelector('img').addEventListener('load', () => {
+        background.style.opacity = 0.96
       })
     }
     window.requestAnimationFrame(this.matchTarget)

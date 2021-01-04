@@ -14,17 +14,18 @@ class CourseControllerTest extends WebTestCase
     public function testShowSuccessAndRightTitle()
     {
         /** @var Course $course */
-        ['course1' => $course] = $this->loadFixtures(['courses']);
+        ['course_with_technology' => $course] = $this->loadFixtures(['courses']);
         $this->client->request('GET', "/tutoriels/{$course->getSlug()}-{$course->getId()}");
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->expectTitle('Tutoriel Vidéo '.$course->getTitle());
-        $this->expectH1($course->getTitle());
+        $technologies = collect($course->getMainTechnologies())->map->getName()->implode(' & ');
+        $this->expectTitle("Tutoriel vidéo {$technologies} : {$course->getTitle()}");
+        $this->expectH1("Tutoriel {$technologies} : ".$course->getTitle());
     }
 
     public function testIndexSuccess()
     {
         $this->loadFixtures(['courses']);
-        $this->client->request('GET', "/tutoriels");
+        $this->client->request('GET', '/tutoriels');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->expectTitle('Tous les tutoriels');
         $this->expectH1('Tous les tutoriels');
@@ -33,7 +34,7 @@ class CourseControllerTest extends WebTestCase
     public function testPremiumSuccess()
     {
         $this->loadFixtures(['courses']);
-        $this->client->request('GET', "/tutoriels/premium");
+        $this->client->request('GET', '/tutoriels/premium');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->expectTitle('Tous les tutoriels premiums');
         $this->expectH1('Tous les tutoriels premiums');
@@ -45,7 +46,7 @@ class CourseControllerTest extends WebTestCase
         /** @var Course $course */
         $course = $data['course1'];
         $this->client->request('GET', "/tutoriels/{$course->getId()}/video");
-        $this->assertResponseRedirects('/login');
+        $this->assertResponseRedirects('/connexion');
     }
 
     public function testDownloadVideoAuthenticatedWithoutPremium(): void

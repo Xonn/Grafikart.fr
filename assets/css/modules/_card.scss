@@ -8,7 +8,7 @@
 
 .card,
 %card {
-  background: var(--background-light);
+  background: var(--card-bg, var(--background-light));
   border: 1px solid var(--border);
   box-shadow: 0 2px 4px var(--shadow);
   border-radius: 3px;
@@ -17,7 +17,7 @@
 
 .card-big,
 %card-big {
-  background: var(--background-light);
+  background: var(--card-bg, var(--background-light));
   border: 1px solid var(--border);
   box-shadow: 0 2px 20px var(--shadow);
   border-radius: 4px;
@@ -51,7 +51,7 @@
   align-items: center;
 }
 .card__description p {
-  opacity: 0.65;
+  color: var(--color-light)
 }
 .card__title {
   font-family: $font-alt;
@@ -66,13 +66,14 @@
   width: 40px;
   height: 40px;
   display: block;
+  object-fit: contain;
 }
 .card__footer {
   margin-top: auto;
   display: flex;
   align-items: center;
   min-height: 36px;
-  background: var(--card-footer);
+  background: var(--card-bg-footer, var(--card-footer));
   padding: 0 var(--card-padding);
   font-size: .9rem;
 
@@ -81,7 +82,7 @@
   }
 
   & > * {
-    opacity: 0.65;
+    color: var(--color-light);
     white-space: nowrap;
   }
 
@@ -141,7 +142,7 @@
     background: var(--contrast);
   }
 }
-.card[style^='--progress'] .card__progress {
+[style^='--progress'] .card__progress {
   opacity: 1!important;
 }
 .card--stacked {
@@ -160,7 +161,6 @@
     transform: translate(6px, 6px);
   }
   &::before {
-    opacity: 0;
     transform: translate(0px, 0px);
   }
   &:hover {
@@ -264,7 +264,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(#121c42, 0.85);
+    background-color: rgba(#121c42, 0.65);
   }
 
   &::after {
@@ -295,6 +295,10 @@
     display: grid;
     grid-template-columns: 1fr 250px;
     grid-gap: 30px;
+
+    .homepage & {
+      min-height: 340px;
+    }
   }
   .card__illustration {
     display: block;

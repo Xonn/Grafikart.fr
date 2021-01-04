@@ -2,18 +2,16 @@
 
 namespace App\Domain\Comment;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Core\Orm\AbstractRepository;
+use App\Domain\Auth\User;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Comment|null find($id, $lockMode = null, $lockVersion = null)
- * @method Comment|null findOneBy(array $criteria, array $orderBy = null)
- * @method Comment[]    findAll()
- * @method Comment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends AbstractRepository<Comment>
  */
-class CommentRepository extends ServiceEntityRepository
+class CommentRepository extends AbstractRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -70,5 +68,16 @@ class CommentRepository extends ServiceEntityRepository
             ->addSelect('t', 'a')
             ->setMaxResults(5)
             ->getQuery();
+    }
+
+    public function findLastByUser(User $user): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.author = :user')
+            ->orderBy('c.createdAt', 'DESC')
+            ->setMaxResults(4)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
     }
 }

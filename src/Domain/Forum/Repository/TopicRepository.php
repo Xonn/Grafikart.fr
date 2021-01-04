@@ -2,17 +2,20 @@
 
 namespace App\Domain\Forum\Repository;
 
+use App\Core\Orm\AbstractRepository;
 use App\Domain\Auth\User;
 use App\Domain\Forum\Entity\Message;
 use App\Domain\Forum\Entity\Tag;
 use App\Domain\Forum\Entity\Topic;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Infrastructure\Spam\SpammableRepositoryTrait;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-class TopicRepository extends ServiceEntityRepository
+class TopicRepository extends AbstractRepository
 {
+    use SpammableRepositoryTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Topic::class);
@@ -43,7 +46,7 @@ class TopicRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('t')
             ->where('m.author = :user')
-            ->where('t.author != :user')
+            ->andWhere('t.author != :user')
             ->join('t.messages', 'm')
             ->orderBy('t.updatedAt', 'DESC')
             ->groupBy('t.id')
@@ -53,9 +56,27 @@ class TopicRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Récupère des sujets aléatoirement.
+     */
+    public function findRandom(int $limit): array
+    {
+        $date = new \DateTimeImmutable('-1 months');
+
+        return $this->createQueryBuilder('t')
+            ->where('t.spam = false')
+            ->andWhere('t.createdAt < :date')
+            ->setParameter('date', $date)
+            ->setMaxResults($limit)
+            ->orderBy('RANDOM()')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function queryAllForTag(?Tag $tag): Query
     {
         $query = $this->createQueryBuilder('t')
+            ->where('t.spam = false')
             ->setMaxResults(20)
             ->orderBy('t.createdAt', 'DESC');
         if ($tag) {
@@ -128,6 +149,7 @@ class TopicRepository extends ServiceEntityRepository
                 LEFT JOIN forum_read_time rt on m.topic_id = rt.topic_id AND m.author_id = rt.owner_id
                 LEFT JOIN "user" u on u.id = m.author_id
                 WHERE
+                      u.forum_mail_notification = true AND
                       m.topic_id = :topic AND
                       (rt.notified IS false OR rt.notified IS NULL) AND
                       m.author_id != :user
@@ -149,7 +171,10 @@ class TopicRepository extends ServiceEntityRepository
                 FROM forum_topic t
                 LEFT JOIN forum_read_time rt on t.id = rt.topic_id AND t.author_id = rt.owner_id
                 LEFT JOIN "user" u on u.id = t.author_id
-                WHERE t.id = :topic AND (rt.notified IS false OR rt.notified IS NULL)
+                WHERE
+                      u.forum_mail_notification = true AND
+                      t.id = :topic AND
+                      (rt.notified IS false OR rt.notified IS NULL)
             SQL, $rsm);
         $query->setParameter('topic', $topic->getId());
         $users = array_merge($users, $query->getResult());

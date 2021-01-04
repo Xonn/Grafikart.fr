@@ -2,6 +2,7 @@
 
 namespace App\Domain\Auth;
 
+use App\Core\Twig\CacheExtension\CacheableInterface;
 use App\Domain\Forum\Entity\ForumReaderUserInterface;
 use App\Domain\Notification\Entity\Notifiable;
 use App\Domain\Premium\Entity\PremiumTrait;
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 /**
@@ -21,7 +23,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  * @UniqueEntity(fields={"email"})
  * @UniqueEntity(fields={"username"})
  */
-class User implements UserInterface, \Serializable, ForumReaderUserInterface
+class User implements UserInterface, \Serializable, ForumReaderUserInterface, CacheableInterface
 {
     use PremiumTrait;
     use StripeEntity;
@@ -38,11 +40,15 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=3, max=40)
      */
     private string $username = '';
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Email()
      */
     private string $email = '';
 
@@ -50,6 +56,11 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
      * @ORM\Column(type="string", length=255)
      */
     private string $password = '';
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private string $goal = '';
 
     /** @var array<string> */
     private array $roles = ['ROLE_USER'];
@@ -75,7 +86,7 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
     private \DateTimeInterface $createdAt;
 
     /**
-     * @ORM\Column(type="string", length=2, nullable=true)
+     * @ORM\Column(type="string", length=2, nullable=true, options={"default": "FR"})
      */
     private ?string $country = null;
 
@@ -97,9 +108,14 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
     private ?string $confirmationToken = null;
 
     /**
-     * @ORM\Column(type="boolean", options={"default": false})
+     * @ORM\Column(type="string", options={"default": null}, nullable=true)
      */
-    private ?bool $darkMode = false;
+    private ?string $theme = null;
+
+    /**
+     * @ORM\Column(type="boolean", options={"default": true})
+     */
+    private bool $forumMailNotification = true;
 
     public function getId(): ?int
     {
@@ -303,14 +319,38 @@ class User implements UserInterface, \Serializable, ForumReaderUserInterface
         return !$this->isBanned() && null === $this->getConfirmationToken();
     }
 
-    public function getDarkMode(): ?bool
+    public function getGoal(): string
     {
-        return $this->darkMode;
+        return $this->goal;
     }
 
-    public function setDarkMode(?bool $darkMode): User
+    public function setGoal(string $goal): User
     {
-        $this->darkMode = $darkMode;
+        $this->goal = $goal;
+
+        return $this;
+    }
+
+    public function hasForumMailNotification(): bool
+    {
+        return $this->forumMailNotification;
+    }
+
+    public function setForumMailNotification(bool $forumMailNotification): User
+    {
+        $this->forumMailNotification = $forumMailNotification;
+
+        return $this;
+    }
+
+    public function getTheme(): ?string
+    {
+        return $this->theme;
+    }
+
+    public function setTheme(?string $theme): User
+    {
+        $this->theme = $theme;
 
         return $this;
     }

@@ -20,7 +20,7 @@ class ImageController extends AbstractController
 
     public function __construct(ParameterBagInterface $parameterBag)
     {
-        $this->cachePath = $parameterBag->get('kernel.cache_dir').'/images';
+        $this->cachePath = $parameterBag->get('kernel.project_dir').'/var/images';
         $this->publicPath = $parameterBag->get('kernel.project_dir').'/public';
         $this->resizeKey = $parameterBag->get('image_resize_key');
     }
@@ -36,6 +36,7 @@ class ImageController extends AbstractController
             'driver' => 'imagick',
             'response' => new SymfonyResponseFactory(),
             'defaults' => [
+                'q' => 75,
                 'fm' => 'jpg',
                 'fit' => 'crop',
             ],

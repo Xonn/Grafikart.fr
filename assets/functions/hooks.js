@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'preact/hooks'
 import { ApiError, jsonFetch } from '/functions/api.js'
 import { flash } from '/elements/Alert.js'
+import { strToDom } from '/functions/dom.js'
 
 /**
  * Alterne une valeur
@@ -78,20 +79,24 @@ export function useJsonFetchOrFlash (url, params = {}) {
     data: null,
     done: false
   })
-  const fetch = async function () {
-    setState(s => ({ ...s, loading: true }))
-    try {
-      const response = await jsonFetch(url, params)
-      setState(s => ({ ...s, loading: false, data: response, done: true }))
-    } catch (e) {
-      if (e instanceof ApiError) {
-        flash(e.name, 'danger', 4)
-      } else {
-        flash(e, 'danger', 4)
+  const fetch = useCallback(
+    async (localUrl, localParams) => {
+      setState(s => ({ ...s, loading: true }))
+      try {
+        const response = await jsonFetch(localUrl || url, localParams || params)
+        setState(s => ({ ...s, loading: false, data: response, done: true }))
+        return response
+      } catch (e) {
+        if (e instanceof ApiError) {
+          flash(e.name, 'danger', 4)
+        } else {
+          flash(e, 'danger', 4)
+        }
       }
-    }
-    setState(s => ({ ...s, loading: false }))
-  }
+      setState(s => ({ ...s, loading: false }))
+    },
+    [url, params]
+  )
   return { ...state, fetch }
 }
 
@@ -175,4 +180,21 @@ export function useVisibility (node, once = true, options = {}) {
   })
 
   return visible
+}
+
+let favIconBadge = null
+
+export function useNotificationCount (n) {
+  useAsyncEffect(async () => {
+    if (favIconBadge === null) {
+      if (n === 0) {
+        return
+      }
+      await import('favicon-badge')
+      favIconBadge = strToDom(`<favicon-badge src="/favicon.ico" badge="true" badgeSize="6"/>`)
+      document.head.appendChild(favIconBadge)
+      return
+    }
+    favIconBadge.setAttribute('badge', n === 0 ? 'false' : 'true')
+  }, [n])
 }

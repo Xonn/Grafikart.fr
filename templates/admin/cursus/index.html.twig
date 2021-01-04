@@ -5,13 +5,12 @@
     Gestion des cursus
 {% endblock %}
 
+{% block actions %}
+  <a href="{{ path('admin_cursuscategory_index') }}" class="btn-secondary">Gérer les catégories</a>
+  <a href="{{ path(prefix ~ '_new') }}" class="btn-primary">Ajouter un cursus</a>
+{% endblock %}
+
 {% block content %}
-    <div class="flex">
-      <form class="form-group dashboard-search">
-        <input name="q" type="text" placeholder="Rechercher une formation" value="{{ app.request.get('q') }}" >
-      </form>
-      <a href="{{ path(prefix ~ '_new') }}" class="dashboard-btn">Ajouter un cursus</a>
-    </div>
     <table class="table">
       <thead>
       <tr>
@@ -40,6 +39,7 @@
           <td><span class="bullet {% if row.online == false %}bullet--danger{% endif %}"></span></td>
           <td>
             <div class="dashboard-actions">
+              <a href="{{ path(prefix ~ '_clone', {id: row.id}) }}">{{ icon('clone') }}</a>
               <a href="{{ link }}">{{ icon('edit') }}</a>
               <form action="{{ path(prefix ~ '_edit', {id: row.id}) }}" method="post" onsubmit="return confirm('Voulez vous vraiment supprimer ce contenu')">
                 <input type="hidden" name="_method" value="DELETE" />

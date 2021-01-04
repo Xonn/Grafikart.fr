@@ -26,6 +26,8 @@
 
   pre {
     margin: 2em 0;
+    overflow: auto;
+    border: 1px solid var(--border-light);
   }
 
   p,
@@ -46,6 +48,7 @@
   h1,
   h2,
   h3 {
+    color: var(--color-dark);
     font-family: $font-alt;
     font-weight: bold;
   }
@@ -70,9 +73,6 @@
   }
   h4 {
     margin-top: space(2);
-  }
-
-  pre {
   }
 
   ul {

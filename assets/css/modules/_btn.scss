@@ -1,4 +1,5 @@
 %btn {
+  text-decoration: none!important;
   padding: 9px 16px;
   border: none;
   display: inline-flex;
@@ -13,6 +14,7 @@
   transition: filter 0.3s, background 0.3s, color 0.3s;
   font-size: 0.9em;
   filter: brightness(1);
+  white-space: nowrap;
 
   &[disabled] {
     cursor: default;
@@ -60,6 +62,17 @@
   }
 }
 
+.btn-white-outlined {
+  @extend %btn;
+  border: 1px solid currentColor;
+  box-shadow: none;
+
+  &:hover {
+    filter: none;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
 .btn-danger {
   @extend %btn;
   background: var(--red);
@@ -71,6 +84,24 @@
   color: var(--color) !important;
   background: #ffff;
   border: 1px solid var(--border) !important;
+
+  &:focus,
+  &.active,
+  &[aria-expanded="true"] {
+    color: var(--contrast);
+    border-color: var(--contrast) !important;
+  }
+
+  @include dark {
+    border-color: #323970 !important;
+    background: #323970 !important;
+
+    &:focus,
+    &.active,
+    &[aria-expanded="true"] {
+      border-color: var(--contrast) !important;
+    }
+  }
 }
 
 .btn-big {
@@ -83,7 +114,6 @@
   }
 
   .icon {
-    transform: translateY(-1px);
     margin-right: space(2);
   }
 }
@@ -99,6 +129,25 @@
 .btn-small {
   padding: 5px 10px;
   font-size: 0.8em;
+}
+
+.btn-group {
+  display: inline-flex;
+
+  & > .active {
+    z-index: 2;
+    position: relative;
+  }
+
+  & > * {
+    z-index: 1;
+    border-radius: 0 4px 4px 0;
+    margin-left: -1px;
+  }
+
+  & > *:first-child {
+    border-radius: 4px 0 0 4px;
+  }
 }
 
 .stack > button {
